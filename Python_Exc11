@@ -1,0 +1,96 @@
+#########################################
+# Question 1 - do not delete this comment
+#########################################
+
+class Dish:
+    def __init__(self, name, price, calories, ingredients):
+        if price <= 0:
+            raise ValueError('Price must be greater then 0!')
+        if calories <= 0:
+            raise ValueError('Amount of calories must be greater then 0!')
+        self.name = name
+        self.price = price
+        self.calories = calories
+        self.ingredients = ingredients[:]
+
+    def __repr__(self):
+        return f'{self.name} costs {self.price} NIS and contains: {self.ingredients}\n(Only {self.calories} calories!)'
+
+    def __lt__(self, other):
+        return (self.price, len(self.ingredients)) < (other.price, len(other.ingredients))
+
+    def __eq__(self, other):
+        return (self.price, len(self.ingredients)) == (other.price, len(other.ingredients))
+
+    def __le__(self, other):
+        return self < other or self == other
+
+    def add_ingredient(self, ingredient, calories):
+        if ingredient in self.ingredients:
+            raise ValueError(f'{self.name} already contains {ingredient}!')
+        self.ingredients.append(ingredient)
+        self.calories += calories
+
+    def remove_ingredient(self, ingredient, calories):
+        if ingredient not in self.ingredients:
+            raise ValueError(f'{self.name} does not contain {ingredient}')
+        self.ingredients.remove(ingredient)
+        self.calories -= calories
+
+
+
+#########################################
+# Question 2 - do not delete this comment
+#########################################
+class Beverage:
+    def __init__(self, name, price, is_diet):
+        if price < 0:
+            raise ValueError('Beverage price must be greater then 0!')
+        self.name = name
+        self.price = price
+        self.is_diet = is_diet
+
+    def __repr__(self):
+        result = f'{self.name} costs {self.price} NIS'
+        if self.is_diet:
+            result += ' (diet)'
+        return result
+
+    def get_price(self, size='normal'):
+        if size not in ['normal', 'big', 'small']:
+            raise ValueError('invalid size')
+        if size == 'big':
+            return self.price * 1.2
+        elif size == 'small':
+            return self.price * 0.8
+        return self.price
+
+
+#########################################
+# Question 3 - do not delete this comment
+#########################################
+class Meal:
+    def __init__(self, name, beverage, dishes):
+        self.name = name
+        self.beverage = beverage
+        self.dishes = dishes[:]
+        self.is_diet = self.beverage.is_diet and \
+                       sum(dish.calories for dish in self.dishes) < 800
+
+    def __repr__(self):
+        result = f'{self.name} meal costs {self.get_price()} NIS'
+        if self.is_diet:
+            result += ' (healthy!)'
+        return result
+
+    def get_price(self):
+        price = self.beverage.get_price('small') + sum(dish.price for dish in self.dishes)
+        cheapest_dish = min(self.dishes)
+        return price - cheapest_dish.price
+
+    def __contains__(self, ingredient):
+        for dish in self.dishes:
+            if ingredient in dish.ingredients:
+                return True
+        return False
+
